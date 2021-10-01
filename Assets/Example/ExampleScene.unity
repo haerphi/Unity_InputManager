@@ -162,10 +162,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 713d7ec082530dd4fad35ef34d8dd67b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alphabet: abcdefghijklmnopqrstuvwxyz
-  getUp: 
-  getDown: 
-  isPressed: []
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -252,7 +248,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdedfad230a383244809f73c33bf0c39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputManagerGameObject: {fileID: 519420028}
+  inputManager: {fileID: 519420030}
+  compteur: 0
+  triggerOn: F
 --- !u!4 &953181205
 Transform:
   m_ObjectHideFlags: 0
