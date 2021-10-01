@@ -1,4 +1,3 @@
-using InputMangerAction;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,75 +5,105 @@ using UnityEngine;
 
 namespace InputMangerAction
 {
-    public class InputManagerAction
+    public class InputAction
     {
         public Func<string, bool> TheFunc { get; set; }
         public string Trigger { get; set; }
+        public int Priority { get; set; }
 
-        public InputManagerAction(Func<string, bool> myfunc, string trigger)
+        public InputAction(Func<string, bool> myfunc, string trigger, int priority = 0)
         {
             TheFunc = myfunc;
             Trigger = trigger;
+            Priority = priority;
+        }
+    }
+
+    public class InputManager : MonoBehaviour
+    {
+        private readonly string alphabet = "abcdefghijklmnopqrstuvwxyz1234567890-=!@#$%^&*()_+[]{};':\",./<>?\\"; // TODO maybe use something else
+        private string getUp;
+        private string getDown;
+        private List<string> isPressed = new List<string>();
+
+        private List<InputAction> getKeyDownFunctions = new List<InputAction>();
+
+        public string GetKeyDown
+        {
+            get { return getDown; }
         }
 
-    }
-}
-
-public class InputManager : MonoBehaviour
-{
-    [SerializeField] private string alphabet = "abcdefghijklmnopqrstuvwxyz1234567890"; // TODO maybe use something else
-    [SerializeField] private string getUp;
-    [SerializeField] private string getDown;
-    [SerializeField] private List<string> isPressed;
-
-    [SerializeField] public List<InputManagerAction> getDownFunctions = new List<InputManagerAction>();
-
-
-    public string GetKeyDown
-    {
-        get { return getDown; }
-    }
-
-    public string GetKeyUp
-    {
-        get { return getUp; }
-    }
-
-    public List<string> GetKeyPressed
-    {
-        get { return isPressed; }
-    }
-
-
-    // Update is called once per frame
-    void Update()
-    {
-        for (int i = 0; i < alphabet.Length; i++)
+        public string GetKeyUp
         {
-            if (Input.GetKeyDown(Char.ToString(alphabet[i])))
+            get { return getUp; }
+        }
+
+        public List<string> GetKeyPressed
+        {
+            get { return isPressed; }
+        }
+
+        public bool AddFunctionOnKeyDown(InputAction action)
+        {
+            int idx = getKeyDownFunctions.FindIndex(getDownFunction => getDownFunction.Trigger == action.Trigger);
+            // if the item exist and his priority is different of -1 or his priority is heighter than the new action
+            if (idx > -1 && (getKeyDownFunctions[idx].Priority == -1 || getKeyDownFunctions[idx].Priority > action.Priority))
             {
-                string theChar = Char.ToString(alphabet[i]).ToUpper();
-                getDown = theChar;
-                isPressed.Add(theChar);
-                int idx = getDownFunctions.FindIndex(getDownFunction => getDownFunction.Trigger == theChar);
-                if (idx > -1)
+                return false;
+            }
+            // if the item exist and his priority is lower than the new action 
+            else if (idx > -1 && getKeyDownFunctions[idx].Priority <= action.Priority)
+            {
+                getKeyDownFunctions.Remove(getKeyDownFunctions[idx]);
+            }
+
+            getKeyDownFunctions.Add(action);
+            return true;
+        }
+
+        public bool RemoveFunctionOnKeyDown(string trigger)
+        {
+            int idx = getKeyDownFunctions.FindIndex(getDownFunction => getDownFunction.Trigger == trigger);
+            if (idx > -1)
+            {
+                getKeyDownFunctions.Remove(getKeyDownFunctions[idx]);
+                return true;
+            }
+
+            return false;
+        }
+
+
+        // Update is called once per frame
+        void Update()
+        {
+            for (int i = 0; i < alphabet.Length; i++)
+            {
+                if (Input.GetKeyDown(Char.ToString(alphabet[i])))
                 {
-                    getDownFunctions[idx].TheFunc("potato");
+                    string theChar = Char.ToString(alphabet[i]).ToUpper();
+                    getDown = theChar;
+                    isPressed.Add(theChar);
+                    int idx = getKeyDownFunctions.FindIndex(getDownFunction => getDownFunction.Trigger == theChar);
+                    if (idx > -1)
+                    {
+                        getKeyDownFunctions[idx].TheFunc("potato");
+                    }
                 }
-            }
-            else
-            {
-                getDown = null;
-            }
-            if (Input.GetKeyUp(Char.ToString(alphabet[i])))
-            {
-                string theCar = Char.ToString(alphabet[i]).ToUpper();
-                getUp = theCar;
-                isPressed.Remove(theCar);
-            }
-            else
-            {
-                getUp = null;
+                else
+                {
+                    getDown = null;
+                }
+                if (Input.GetKeyUp(Char.ToString(alphabet[i])))
+                {
+                    string theCar = Char.ToString(alphabet[i]).ToUpper();
+                    getUp = theCar;
+                    isPressed.Remove(theCar);
+                }
+                else
+                {
+                    getUp = null;
+                }
             }
         }
     }
